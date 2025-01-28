@@ -8,61 +8,90 @@ const port = 3000;
 // Serve static files
 app.use(express.static('public'));
 
+// Helper function to determine CSV format
+function determineCSVFormat(headers) {
+    // Check for exact column header matches
+    if (headers.includes('Date(UTC+1 28 Jan 2024 - 28 Jan 2025)')) {
+        return 'new';
+    }
+    if (headers.includes('Date(UTC+-5 21 Jan 2025 - 27 Jan 2025)')) {
+        return 'old';
+    }
+    return 'unknown';
+}
+
+// Helper function to normalize trade data
+function normalizeTrade(row, format) {
+    const trade = {};
+    
+    if (format === 'new') {
+        trade.timestamp = row['Date(UTC+1 28 Jan 2024 - 28 Jan 2025)'];
+        trade.symbol = row['Symbol'];
+        trade.side = row['Side'];
+        trade.price = parseFloat(row['Fill Price']) || 0;
+        trade.quantity = parseFloat(row['Filled (crypto amount)']) || 0;
+        trade.total = parseFloat(row['Total']) || 0;
+        trade.fee = parseFloat(row['Fee']) || 0;
+        trade.realizedPnL = parseFloat(row['Realized PnL']) || 0;
+        trade.contractSize = parseFloat(row['Contract Size']) || 0;
+    } else if (format === 'old') {
+        trade.timestamp = row['Date(UTC+-5 21 Jan 2025 - 27 Jan 2025)'];
+        trade.symbol = row['Symbol'];
+        trade.side = row['Side'];
+        trade.price = parseFloat(row['Fill Price']) || 0;
+        trade.quantity = parseFloat(row['Filled (USDT)']) || 0;
+        trade.total = parseFloat(row['Total']) || 0;
+        trade.fee = parseFloat(row['Fee']) || 0;
+        trade.realizedPnL = parseFloat(row['Realized PnL']) || 0;
+        trade.contractSize = parseFloat(row['Contract Size']) || 0;
+    }
+
+    // Debug log to check the data
+    if (!trade.price || !trade.quantity) {
+        console.log('Warning: Invalid trade data:', {
+            format,
+            original: row,
+            normalized: trade
+        });
+    }
+
+    return trade;
+}
+
 // Route to get trade data
 app.get('/api/trades', (req, res) => {
     try {
-        const csvFilePath = path.join(__dirname, 'tradeHistory.csv');
-        
-        if (!fs.existsSync(csvFilePath)) {
-            console.error('CSV file not found:', csvFilePath);
-            return res.status(404).json({ error: 'Trade history file not found' });
-        }
-
-        const fileContent = fs.readFileSync(csvFilePath, 'utf-8');
-        
+        const fileContent = fs.readFileSync('tradeHistory.csv', 'utf8');
         Papa.parse(fileContent, {
             header: true,
             skipEmptyLines: true,
-            transformHeader: function(header) {
-                // Map CSV headers to our expected format
-                const headerMap = {
-                    'Date(UTC+-5 21 Jan 2025 - 27 Jan 2025)': 'timestamp',
-                    'Symbol': 'symbol',
-                    'Side': 'side',
-                    'Fill Price': 'price',
-                    'Filled (USDT)': 'quantity',
-                    'Fee': 'fee',
-                    'Realized PnL': 'realizedPnL'
-                };
-                return headerMap[header] || header;
-            },
-            transform: function(value, header) {
-                // Clean up the data
-                if (header === 'realizedPnL' || header === 'fee' || header === 'price' || header === 'quantity') {
-                    return parseFloat(value) || 0;
-                }
-                return value;
-            },
             complete: (results) => {
                 if (results.errors.length > 0) {
                     console.error('CSV parsing errors:', results.errors);
-                    return res.status(500).json({ error: 'Error parsing CSV file' });
                 }
 
-                const trades = results.data;
-                console.log('First trade:', trades[0]); // Debug log
+                const format = determineCSVFormat(results.meta.fields);
+                console.log('Detected format:', format);
+                console.log('Headers:', results.meta.fields);
+
+                const normalizedTrades = results.data
+                    .filter(row => Object.keys(row).length > 1) // Filter out empty rows
+                    .map(row => normalizeTrade(row, format));
+
+                // Debug log
+                console.log('Sample normalized trade:', normalizedTrades[0]);
                 
-                const metrics = calculateMetrics(trades);
+                const metrics = calculateMetrics(normalizedTrades);
                 res.json(metrics);
             },
             error: (error) => {
-                console.error('Papa Parse error:', error);
-                res.status(500).json({ error: 'Error parsing CSV file' });
+                console.error('Error parsing CSV:', error);
+                res.status(500).json({ error: 'Failed to parse trade data' });
             }
         });
     } catch (error) {
-        console.error('Server error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error reading file:', error);
+        res.status(500).json({ error: 'Failed to read trade data' });
     }
 });
 
@@ -137,8 +166,9 @@ function calculateMetrics(trades) {
     sortedTrades.forEach(trade => {
         if (!trade.timestamp || !trade.symbol) return;
 
-        const pnl = parseFloat(trade.realizedPnL || 0);
-        const volume = parseFloat(trade.quantity || 0);
+        // Calculate actual PnL based on format
+        const pnl = trade.realizedPnL;
+        const volume = trade.quantity * trade.price; // Calculate actual volume in USDT
         const tradeDate = new Date(trade.timestamp);
         
         // Basic metrics
@@ -152,7 +182,7 @@ function calculateMetrics(trades) {
 
         metrics.tradedPairs.add(trade.symbol);
         metrics.totalVolume += volume;
-        metrics.totalFees += parseFloat(trade.fee || 0);
+        metrics.totalFees += trade.fee;
         metrics.tradeSizes.push(volume);
 
         // Count trades by direction
@@ -205,7 +235,7 @@ function calculateMetrics(trades) {
         metrics.tradesByPair[trade.symbol].totalTrades++;
         metrics.tradesByPair[trade.symbol].volume += volume;
         metrics.tradesByPair[trade.symbol].pnl += pnl;
-        metrics.tradesByPair[trade.symbol].fees += parseFloat(trade.fee || 0);
+        metrics.tradesByPair[trade.symbol].fees += trade.fee;
 
         // Daily P&L calculation
         const dailyKey = tradeDate.toISOString().split('T')[0];
@@ -313,12 +343,23 @@ function calculateMetrics(trades) {
     // Format the duration into a readable string
     metrics.avgTradeDurationFormatted = formatDuration(metrics.avgTradeDuration);
 
-    metrics.avgTradeVolume.buy = metrics.volumeByDirection.buy / metrics.longTrades;
-    metrics.avgTradeVolume.sell = metrics.volumeByDirection.sell / metrics.shortTrades;
+    // Calculate averages for volume
+    if (metrics.longTrades > 0) {
+        metrics.avgTradeVolume.buy = metrics.volumeByDirection.buy / metrics.longTrades;
+    }
+    if (metrics.shortTrades > 0) {
+        metrics.avgTradeVolume.sell = metrics.volumeByDirection.sell / metrics.shortTrades;
+    }
+
+    // Calculate risk metrics
+    if (metrics.profitableTrades > 0) {
+        metrics.riskMetrics.avgWinSize = metrics.totalWinAmount / metrics.profitableTrades;
+    }
+    if (metrics.lossTrades > 0) {
+        metrics.riskMetrics.avgLossSize = metrics.totalLossAmount / metrics.lossTrades;
+    }
 
     // Calculate after processing trades
-    metrics.riskMetrics.avgWinSize = metrics.totalWinAmount / metrics.profitableTrades;
-    metrics.riskMetrics.avgLossSize = metrics.totalLossAmount / metrics.lossTrades;
     metrics.riskMetrics.profitToDrawdownRatio = metrics.totalPnL / (metrics.maxDrawdown || 1);
 
     return metrics;

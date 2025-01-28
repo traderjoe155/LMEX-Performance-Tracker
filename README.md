@@ -1,5 +1,10 @@
 # LMEX-Performance-Tracker
 
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+
 ## Input Data Format
 
 The application expects a CSV file named `tradeHistory.csv` with the following columns:
