@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <h1>Trading Dashboard</h1>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Total P&L</h3>
+                <p id="totalPnL">Loading...</p>
+                <div id="pnlTrend" class="trend"></div>
+            </div>
+            <div class="metric-card">
+                <h3>Today's P&L</h3>
+                <p id="todayPnL">Loading...</p>
+                <div id="todayPnlTrend" class="trend"></div>
+            </div>
+            <div class="metric-card">
+                <h3>Total Volume</h3>
+                <p id="totalVolume">Loading...</p>
+            </div>
+            <div class="metric-card">
+                <h3>Total Fees</h3>
+                <p id="totalFees">Loading...</p>
+            </div>
+            <div class="metric-card">
+                <h3>Win Rate</h3>
+                <p id="winRate">Loading...</p>
+            </div>
+            <div class="metric-card">
+                <h3>Profit Factor</h3>
+                <p id="profitFactor">Loading...</p>
+            </div>
+            <div class="metric-card">
+                <h3>Avg Win/Loss Ratio</h3>
+                <p id="avgWinLossRatio">Loading...</p>
+            </div>
+            <div class="metric-card">
+                <h3>Max Drawdown</h3>
+                <p id="maxDrawdown">Loading...</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h3>Trading Statistics</h3>
+                <table class="stats-table">
+                    <tr>
+                        <th>Total Trades</th>
+                        <td id="totalTrades">Loading...</td>
+                        <th>Avg Position Size</th>
+                        <td id="avgPositionSize">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Long/Short Ratio</th>
+                        <td id="longShortRatio">Loading...</td>
+                        <th>Trading Pairs</th>
+                        <td id="tradingPairs">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Avg Trade Duration</th>
+                        <td id="avgTradeDuration">Loading...</td>
+                        <th>Best Trade</th>
+                        <td id="bestTrade">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Worst Trade</th>
+                        <td id="worstTrade">Loading...</td>
+                        <th>Sharpe Ratio</th>
+                        <td id="sharpeRatio">Loading...</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Daily P&L</h3>
+                <canvas id="monthlyPnLChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Trading Pairs Performance</h3>
+                <canvas id="pairsChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Cumulative P&L</h3>
+                <canvas id="cumulativePnLChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Trade Size Distribution</h3>
+                <canvas id="tradeSizeChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Trading Activity by Hour</h3>
+                <canvas id="hourlyDistributionChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Performance by Time of Day</h3>
+                <canvas id="timeOfDayChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Win/Loss Distribution</h3>
+                <canvas id="winLossDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stats-card">
+                <h3>Additional Trading Metrics</h3>
+                <table class="stats-table">
+                    <tr>
+                        <th>Longest Win Streak</th>
+                        <td id="longestWinStreak">Loading...</td>
+                        <th>Longest Loss Streak</th>
+                        <td id="longestLossStreak">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Average Win Size</th>
+                        <td id="avgWinSize">Loading...</td>
+                        <th>Average Loss Size</th>
+                        <td id="avgLossSize">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Largest Trade</th>
+                        <td id="largestTrade">Loading...</td>
+                        <th>Profit/Drawdown Ratio</th>
+                        <td id="profitDrawdownRatio">Loading...</td>
+                    </tr>
+                    <tr>
+                        <th>Best Time of Day</th>
+                        <td id="bestTimeOfDay">Loading...</td>
+                        <th>Current Streak</th>
+                        <td id="currentStreak">Loading...</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

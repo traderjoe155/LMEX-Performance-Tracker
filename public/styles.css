@@ -1,0 +1,174 @@
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent-color: #4CAF50;
+    --accent-hover: #45a049;
+    --card-bg: #2d2d2d;
+    --border-color: #404040;
+    --chart-grid: #404040;
+    --positive-color: #4CAF50;
+    --negative-color: #f44336;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    color: var(--text-primary);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.metric-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.metric-card p {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 500;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    min-height: 400px;
+}
+
+.chart-card h3 {
+    margin: 0 0 20px 0;
+    font-size: 1.2em;
+    color: var(--text-secondary);
+}
+
+.stats-grid {
+    margin-bottom: 20px;
+}
+
+.stats-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table th, .stats-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stats-table th {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.trend {
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.trend.positive {
+    color: var(--positive-color);
+}
+
+.trend.negative {
+    color: var(--negative-color);
+}
+
+/* Chart customizations for dark theme */
+canvas {
+    background-color: var(--card-bg);
+}
+
+/* Add specific chart container heights */
+#monthlyPnLChart,
+#pairsChart,
+#cumulativePnLChart,
+#tradeSizeChart,
+#hourlyDistributionChart,
+#timeOfDayChart,
+#winLossDistributionChart {
+    height: 350px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-card {
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .chart-card {
+        min-height: 300px;
+        padding: 15px;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
